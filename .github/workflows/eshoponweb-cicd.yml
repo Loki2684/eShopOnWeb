@@ -3,7 +3,7 @@ name: eShopOnWeb Build and Test
 on: [push, workflow_dispatch]
 
 env:
-  RESOURCE-GROUP: rg-eshoponweb-eastus2
+  RESOURCE_GROUP: rg-eshoponweb-eastus2
   LOCATION: eastus2
   TEMPLATE_FILE: infra/webapp.bicep
   SUBSCRIPTION_ID: 22ed6200-17cd-4a24-90e8-2dd69eb1e0c8
@@ -57,32 +57,3 @@ jobs:
           name: .net-app
           path: .net-app
 
-      - name: Download artifact (bicep)
-        uses: actions/download-artifact@v6
-        with:
-          name: bicep-template
-          path: bicep-template
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy infra (Bicep)
-        uses: azure/arm-deploy@v2
-        with:
-          subscriptionId: ${{ env.SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: bicep-template/webapp.bicep
-          parameters: "webAppName=${{ env.WEBAPP_NAME }} location=${{ env.LOCATION }}"
-          failOnStdErr: false
-
-      - name: Publish Website to WebApp
-        uses: Azure/cli@v2
-        with:
-          inlineScript: |
-            az webapp deploy \
-              --name ${{ env.WEBAPP_NAME }} \
-              --resource-group ${{ env.RESOURCE_GROUP }} \
-              --src-path .net-app/app.zip \
-              --type zip
